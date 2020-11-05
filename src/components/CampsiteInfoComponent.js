@@ -7,6 +7,8 @@ import { Breadcrumb, BreadcrumbItem,
 } from 'reactstrap'; 
 import { Link } from 'react-router-dom';  
 import { Control, LocalForm, Errors } from 'react-redux-form';
+import { Loading } from './LoadingComponent';
+
 
 const required = val => val && val.length;
 const maxLength = len => val => !val || (val.length <= len);
@@ -23,7 +25,7 @@ class CommentForm extends Component {
         };
 
         this.toggleModal = this.toggleModal.bind(this);
-        this.handleSubmitComment = this.handleSubmitComment.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
     }
 
     toggleModal(){
@@ -32,24 +34,24 @@ class CommentForm extends Component {
         });
     }
 
-    handleSubmitComment(value){
-        alert(`Alert, ${JSON.stringify(value)}`)
+    handleSubmit(values){
         this.toggleModal();
+        this.props.addComment(this.props.campsiteId, values.rating, values.author, values.text);
     }
 
     render() {
         return(
             <React.Fragment> 
-                <Button onClick={this.toggleModal} outline className="fa-lg" ><i class="fa fa-pencil"/>Submint Comment</Button>
+                <Button onClick={this.toggleModal} outline className="fa-lg" ><i class="fa fa-pencil"/>Submit Comment</Button>
                 
                 <Modal isOpen={this.state.isModalOpen} toggle={this.toggleModal}>
                     <ModalHeader toggle={this.toggleModal}>Submit Comment</ModalHeader>
                     <ModalBody>
-                    <LocalForm onSubmit={values => this.handleSubmitComment(values)}>
+                    <LocalForm onSubmit={values => this.handleSubmit(values)}>
 
                         <div className="form-group">
-                            <Label htmlFor="rating" md={2}>Raiting</Label>
-                            <Control.select model=".raiting" id="raiting" name="raiting"
+                            <Label htmlFor="rating" md={2}>Rating</Label>
+                            <Control.select model=".rating" id="rating" name="rating"
                                 className='form-control'
                                 innerRef={input => this.raiting = input}>
                                     <option value="0"> 0 </option>
@@ -120,11 +122,11 @@ function RenderCampsite({campsite}) {
                         <CardText>{campsite.description}</CardText>
                     </CardBody>
             </Card>
-        </div>
+        </div> 
     );
 }
 
-function RenderComments({comments}) {
+function RenderComments({comments, addComment, campsiteId}) {
     if (comments) {
         return (
             <div className="col-md-5 m-1">
@@ -132,16 +134,13 @@ function RenderComments({comments}) {
                 {comments.map((comment) => {
                     return(
                         <div key={comment.id}> 
-                            <p>
-                                {comment.text}
-                                <br />
-                                {comment.author} {" "}
-                                {new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit'}).format(new Date(Date.parse(comment.date)))}
+                            <p>{comment.text}<br />
+                                --    {comment.author}, {new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit'}).format(new Date(Date.parse(comment.date)))}
                             </p>
                         </div>
-                    )
+                    );
                 })}
-                <CommentForm />
+                <CommentForm campsiteId={campsiteId} addComment={addComment} />
             </div>
         );
     }
@@ -149,6 +148,26 @@ function RenderComments({comments}) {
 }
 
 function CampsiteInfo(props) {
+    if (props.isLoading) {
+        return (
+            <div className="container">
+                <div className="row">
+                    <Loading />
+                </div>
+            </div>
+        );
+    }
+    if (props.errMess) {
+        return (
+            <div className="container">
+                <div className="row">
+                    <div className="col">
+                        <h4>{props.errMess}</h4>
+                    </div>
+                </div>
+            </div>
+        );
+    }
     if (props.campsite) {
         return ( 
             <div className="container">
@@ -158,13 +177,17 @@ function CampsiteInfo(props) {
                             <BreadcrumbItem><Link to="/directory">Directory</Link></BreadcrumbItem>
                             <BreadcrumbItem><Link to="/active">{props.campsite.name}</Link></BreadcrumbItem>
                         </Breadcrumb>
-                        <h2>Cprops.campsite.name</h2>
+                        <h2>props.campsite.name</h2>
                         <hr />
                     </div>
                 </div>
                 <div className="row"> 
                     <RenderCampsite campsite={props.campsite} />
-                    <RenderComments comments={props.comments} />
+                    <RenderComments 
+                        comments={props.comments} 
+                        addComment={props.addComment}
+                        campsiteId={props.campsite.id}
+                    />
                 </div>
             </div>    
         )
