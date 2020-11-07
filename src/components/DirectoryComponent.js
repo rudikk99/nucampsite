@@ -13,6 +13,7 @@ function RenderDirectoryItem({campsite}) {
                     <CardTitle>{campsite.name}</CardTitle>
                 </CardImgOverlay>
             </Link>
+            
         </Card>
     );
 }

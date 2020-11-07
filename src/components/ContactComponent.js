@@ -3,6 +3,7 @@ import { Breadcrumb, BreadcrumbItem,
     Button, Label, Col, Row } from 'reactstrap';
 import { Link } from 'react-router-dom';  
 import { Control, Form, Errors } from 'react-redux-form';
+import "../App.css";
 
 const required = val => val && val.length;
 const maxLength = len => val => !val || (val.length <= len);
@@ -28,9 +29,8 @@ class Contact extends Component {
                 lastName: false,
                 phoneNum: false,
                 email: false
-            }
+            },
         };
-    
     
 
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -224,6 +224,8 @@ class Contact extends Component {
             </div>
         );
     }
+    
+
 }
 
 export default Contact;
